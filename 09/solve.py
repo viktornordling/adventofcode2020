@@ -31,7 +31,7 @@ def solve_part2(numbers, part_2_n):
             added.append(b)
             if sum == part_2_n:
                 added.sort()
-                print("Part 2:", added[0] + added[-1])
+                return added[0] + added[-1]
         nbuffer.reverse()
         while sum > part_2_n:
             deleted = nbuffer[0]
@@ -45,5 +45,6 @@ lines = open('input.txt', 'r').readlines()
 numbers = [parse(line) for line in lines]
 
 part2_n = solve_part1(numbers)
-print("Part 1", part2_n)
+print("Part 1:", part2_n)
+print("Part 2:", solve_part2(numbers, part2_n))
 
