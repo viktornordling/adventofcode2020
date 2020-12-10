@@ -1,6 +1,7 @@
 from itertools import count
 from math import prod
 
+
 def count_trees(lines, skip_x, skip_y):
     cur_x = 0
     trees = 0
