@@ -60,7 +60,6 @@ def solve_part2(numbers, goal):
         graph[n] = [item for item in [n + 1, n + 2, n + 3] if item in snumbers]
 
     topological_order = topo_order(graph, 0, snumbers)
-    # topological_order.reverse()
     ways = {goal: 1}
     for n in topological_order[1:]:
         children = graph[n]
@@ -80,9 +79,6 @@ def solve():
 
     solve_part1(jolts + [0, max(jolts) + 3])
     solve_part2(jolts + [0, max(jolts) + 3], max(jolts) + 3)
-    # part2_n = solve_part1(numbers)
-    # print("Part 1:", part2_n)
-    # print("Part 2:", solve_part2(numbers, part2_n))
 
 
 solve()
