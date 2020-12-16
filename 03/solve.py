@@ -17,7 +17,7 @@ def count_trees(lines, skip_x, skip_y):
 # lines = open('easy.txt', 'r').readlines()
 lines = open('input.txt', 'r').readlines()
 
-print("Part 1:", count_trees(lines, 2, 1))
+print("Part 1:", count_trees(lines, 3, 1))
 
 slopes = [(1, 1), (3, 1), (5, 1), (7, 1), (1, 2)]
 trees = [count_trees(lines, x, y) for (x, y) in slopes]

@@ -1,8 +1,4 @@
 from math import prod
-import re
-import math
-import string
-from functools import reduce
 
 
 def invalid(line, fields):
@@ -16,7 +12,7 @@ def invalid(line, fields):
                     break
         if not valid_for_some_field:
             return x
-    return -1
+    return None
 
 
 def solve_part_1(lines):
@@ -31,8 +27,7 @@ def solve_part_1(lines):
 
     nearby = parts[2].split("\n")
     invalids = [invalid(line, all_fields) for line in nearby[1:]]
-    xx = [x for x in invalids if x != -1]
-    return sum(xx)
+    return sum([x for x in invalids if x is not None])
 
 
 def all_tickets_valid_in_col(valids, field, col):
@@ -81,7 +76,7 @@ def solve_part_2(lines):
         all_fields.append({'name': field_name, 'ranges': ranges})
 
     nearby = parts[2].split("\n")
-    valids = [line for line in nearby[1:] if invalid(line, all_fields) == -1]
+    valids = [line for line in nearby[1:] if invalid(line, all_fields) is None]
 
     # Maps each field to a list of cols that satisfy that field
     pot_cols = {}
