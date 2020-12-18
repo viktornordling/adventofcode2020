@@ -41,14 +41,13 @@ def eval_expr(tokens):
             opts.append(t)
         if t == ')':
             # print("FUCK PARENS!")
-            while len(opts) > 0 and len(vals) > 1:
-                while opts[-1] == '(':
-                    opts.pop()
-                result = apply_opt(opts.pop(), vals.pop(), vals.pop())
-                # print("evaled paren: ", result)
-                vals.append(result)
-            if len(opts) > 0 and opts[-1] == '(':
+            if opts[-1] == '(':
                 opts.pop()
+            while len(opts) > 0 and opts[-1] != '(':
+                result = apply_opt(opts.pop(), vals.pop(), vals.pop())
+                vals.append(result)
+            # if len(opts) > 0 and opts[-1] == '(':
+            #     opts.pop()
 
     while len(opts) != 0:
         right = vals.pop()
