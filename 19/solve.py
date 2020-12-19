@@ -4,7 +4,7 @@ class Rule:
         self.rule_id = rule_id
 
     def matches(self, str, rule_dict):
-        return True
+        return []
 
 
 class SerialRule(Rule):
@@ -14,31 +14,19 @@ class SerialRule(Rule):
         super().__init__(rule_id)
         self.rules = rules
 
+    def eval_serial_recursive(self, str, sub_rules, rule_dict):
+        if len(sub_rules) == 0:
+            return [str]
+        cur: Rule = sub_rules[0]
+        sub_matches = cur.matches(str, rule_dict)
+        all_results = []
+        for match in sub_matches:
+            gg = self.eval_serial_recursive(match, sub_rules[1:], rule_dict)
+            all_results += gg
+        return all_results
+
     def matches(self, str, rule_dict):
-        print("Evaluating serial rule", self.rule_id)
-        rest_queue = [str]
-        rests_for_next_rule = []
-        matches = []
-        for rule in self.rules:
-            rule_has_matches = False
-            rest_queue += rests_for_next_rule
-            rests_for_next_rule = []
-            while len(rest_queue) > 0:
-                rest = rest_queue.pop(0)
-                matches = rule.matches(rest, rule_dict)
-                if len(matches) == 0:
-                    # No matches.
-                    print("no matches")
-                elif len(matches) == 1:
-                    rests_for_next_rule.append(matches[0])
-                    rule_has_matches = True
-                else:
-                    rule_has_matches = True
-                    for r in matches:
-                        rests_for_next_rule.append(r)
-            if not rule_has_matches:
-                return []
-        return matches
+        return self.eval_serial_recursive(str, self.rules, rule_dict)
 
 
 class OrRule(Rule):
@@ -49,7 +37,6 @@ class OrRule(Rule):
         self.rules = rules
 
     def matches(self, str, rule_dict):
-        print("Evaluating or rule", self.rule_id)
         rest_list = []
         for rule in self.rules:
             matches = rule.matches(str, rule_dict)
@@ -66,7 +53,6 @@ class LiteralRule(Rule):
         self.literal = literal
 
     def matches(self, str, rule_dict):
-        print("Evaluating literal rule", self.rule_id)
         if len(str) > 0 and str[0] == self.literal:
             return [str[1:]]
         return []
@@ -80,7 +66,6 @@ class RuleRef(Rule):
         self.rid = rid
 
     def matches(self, str, rule_dict):
-        print("Evaluating rule ref", self.rule_id)
         rule = rule_dict[self.rid]
         return rule.matches(str, rule_dict)
 
@@ -89,8 +74,6 @@ rules_being_built = set()
 
 
 def parse_or_get_rule(line_map, rule_dict, rule_str="", line_id=""):
-    # print("rule_str = ", rule_str)
-    # print("line_id = ", line_id)
     if rule_str != "":
         rule = rule_str.strip()
     else:
@@ -101,12 +84,10 @@ def parse_or_get_rule(line_map, rule_dict, rule_str="", line_id=""):
     if rid in rule_dict:
         return rule_dict[rid]
     elif rid in rules_being_built:
-        # print("rid {} in rules_being_built, returning a RuleRef".format(rid, rules_being_built))
         return RuleRef(rid)
     rules_being_built.add(rid)
     body: str = rparts[1].strip()
     if "|" in body:
-        # print("parsing or rule")
         or_rule_parts = body.split("|")
         left = or_rule_parts[0].strip().split(" ")
         right = or_rule_parts[1].strip().split(" ")
@@ -114,11 +95,9 @@ def parse_or_get_rule(line_map, rule_dict, rule_str="", line_id=""):
         right_rule = SerialRule([parse_or_get_rule(line_map, rule_dict, line_id=line_id.strip()) for line_id in right], "{}_r".format(rid))
         rule_dict[rid] = OrRule([left_rule, right_rule], rid)
     elif body.startswith("\""):
-        # print("parsing literal rule")
         literal = body.replace("\"", "")
         rule_dict[rid] = LiteralRule(literal, rid)
     else:
-        # print("parsing serial rule")
         rule_dict[rid] = SerialRule([parse_or_get_rule(line_map, rule_dict, line_id=line_id) for line_id in body.split(" ")], rid)
     rules_being_built.remove(rid)
     return rule_dict[rid]
@@ -129,7 +108,7 @@ def check(regex, str, rule_dict):
     return len(m) > 0 and m[0] == ""
 
 
-def solve_part_1(data):
+def count_valid_strings(data):
     parts = data.split("\n\n")
     rule_part = parts[0]
     string_part = parts[1]
@@ -144,36 +123,15 @@ def solve_part_1(data):
         line_map[rid] = rule
 
     for rule in rules:
-        # print("parsing line:", rule)
         parse_or_get_rule(line_map, rule_dict, rule_str=rule.strip())
 
     rule0: Rule = rule_dict[0]
-    count = 0
-    for str in string_part.split("\n"):
-        print("Testing line:", str)
-        if check(rule0, str, rule_dict):
-            print("Valid")
-            count += 1
-        else:
-            print("Invalid")
-
-    return count
+    return len([str for str in string_part.split("\n") if check(rule0, str, rule_dict)])
 
 
 def solve():
-    # data2 = open('easy.txt', 'r').read()
-    # data = open('input.txt', 'r').read()
-    # data2 = open('easy2_noloop.txt', 'r').read()
-    data2 = open('debug.txt', 'r').read()
-    print("Part 2:", solve_part_1(data2))
-    # print("*************************")
-    # print("*************************")
-    # print("*************************")
-    # data2 = open('easy2_loop.txt', 'r').read()
-    # print("Part 2:", solve_part_1(data2))
-    # data2 = open('input2.txt', 'r').read()
-
-    # print("Part 1:", solve_part_1(data))
+    print("Part 1:", count_valid_strings(open('input.txt', 'r').read()))
+    print("Part 2:", count_valid_strings(open('input2.txt', 'r').read()))
 
 
 
