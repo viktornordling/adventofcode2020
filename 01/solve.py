@@ -5,14 +5,15 @@ def find_two_numbers_adding_up_to(sum, numbers):
     for number in numbers:
         if (sum - number) in numbers:
             return[number, (sum - number)]
+    return None
 
 
 def find_three_numbers_adding_up_to(sum, numbers):
     for number1 in numbers:
         number_to_look_for = sum - number1
-        for number2 in numbers:
-            if (number_to_look_for - number2) in numbers:
-                return[number1, number2, number_to_look_for - number2]
+        found = find_two_numbers_adding_up_to(number_to_look_for, numbers)
+        if found is not None:
+            return found + [number1]
 
 
 lines = open('input.txt', 'r').readlines()
