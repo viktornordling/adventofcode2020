@@ -21,11 +21,14 @@ def eval_expr(tokens):
         if t in ['(', '+', '*']:
             opts.append(t)
         if t == ')':
-            if opts[-1] == '(':
-                opts.pop()
+            # if opts[-1] == '(':
+            #     opts.pop()
             while len(opts) > 0 and opts[-1] != '(':
                 result = apply_opt(opts.pop(), vals.pop(), vals.pop())
                 vals.append(result)
+            if opts[-1] == '(':
+                opts.pop()
+
 
     while len(opts) != 0:
         right = vals.pop()
@@ -49,8 +52,8 @@ def eval_expr_2(tokens):
                 vals.append(result)
             opts.append(t)
         if t == ')':
-            if opts[-1] == '(':
-                opts.pop()
+            # if opts[-1] == '(':
+            #     opts.pop()
             while len(opts) > 0 and opts[-1] != '(':
                 result = apply_opt(opts.pop(), vals.pop(), vals.pop())
                 vals.append(result)
@@ -94,12 +97,25 @@ def solve_part_2(lines):
 
 
 def solve():
-    # lines = open('easy.txt', 'r').readlines()
-    lines = open('input.txt', 'r').readlines()
-
+    lines = open('easy.txt', 'r').readlines()
     print("Part 1:", solve_part_1(lines))
+    lines = open('easy2.txt', 'r').readlines()
+    print("Part 1:", solve_part_1(lines))
+    lines = open('input.txt', 'r').readlines()
+    print("Part 1:", solve_part_1(lines))
+
+    lines = open('easy.txt', 'r').readlines()
     print("Part 2:", solve_part_2(lines))
+    lines = open('easy2.txt', 'r').readlines()
+    print("Part 2:", solve_part_2(lines))
+    lines = open('input.txt', 'r').readlines()
+    print("Part 2:", solve_part_2(lines))
+
+    # print("Part 1:", solve_part_1(lines))
+
 
 
 solve()
+
+
 
