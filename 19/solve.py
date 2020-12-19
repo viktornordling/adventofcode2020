@@ -59,8 +59,6 @@ class LiteralRule(Rule):
 
 
 class RuleRef(Rule):
-    rid = None
-
     def __init__(self, rid):
         super().__init__(rid)
         self.rid = rid
