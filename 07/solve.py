@@ -38,12 +38,14 @@ for bag in bag_rules:
         containable_bags.append(containing_bag)
         bag_to_containable_bags[contained_bag] = containable_bags
 
+
 def count_possible_outer_bags(start_bag):
     containable_bags = set(bag_to_containable_bags.get(start_bag, []))
     further = set()
     for bag in containable_bags:
         further |= count_possible_outer_bags(bag)
     return containable_bags | further
+
 
 def count_bags_in(start_bag):
     rule = bag_rule_dict.get(start_bag, None)
@@ -53,6 +55,7 @@ def count_bags_in(start_bag):
     for r in rule:
         total += int(r['amount']) * count_bags_in(r['bag_name']) + int(r['amount'])
     return total
+
 
 print("Part 1: ", len(count_possible_outer_bags("shiny gold")))
 print("Part 2: ", count_bags_in("shiny gold"))
