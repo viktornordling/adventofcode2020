@@ -62,11 +62,11 @@ def count_adjacent_black_and_white(tile_pos, tile_map):
     if tile_pos[1] % 2 == 1:
         west_incr = 1
     adjacent_positions = [
-        (tile_pos[0] + 1, tile_pos[1]),  # w
-        (tile_pos[0] - 1, tile_pos[1]),  # e
-        (tile_pos[0] + west_incr, tile_pos[1] - 1),  # sw
+        (tile_pos[0] - 1, tile_pos[1]),  # w
+        (tile_pos[0] + 1, tile_pos[1]),  # e
+        (tile_pos[0] - west_incr, tile_pos[1] - 1),  # sw
         (tile_pos[0] + east_incr, tile_pos[1] - 1),  # se
-        (tile_pos[0] + west_incr, tile_pos[1] + 1),  # nw
+        (tile_pos[0] - west_incr, tile_pos[1] + 1),  # nw
         (tile_pos[0] + east_incr, tile_pos[1] + 1),  # ne
     ]
     missing_tile_ids = [adj_pos for adj_pos in adjacent_positions if tile_map.get(adj_pos) is None]
@@ -98,8 +98,8 @@ def print_grid(tile_map):
                 col = 'B'
             else:
                 col = 'W'
-            # print(" {}({}) ".format(col, x), end='')
-            print(" {} ".format(col), end='')
+            print(" {}({}) ".format(col, x), end='')
+            # print(" {} ".format(col), end='')
         y -= 1
         print()
 
@@ -113,7 +113,9 @@ def flip_tiles(tile_map):
     max_x = max(tile_map, key=lambda tile_key: tile_key[0])[0]
     y = max_y + 1
     while y >= min_y - 1:
-        for x in range(min_x - 1, max_x + 2):
+        frange = range(min_x - 1, max_x + 2)
+        # print(frange)
+        for x in frange:
             tile = tile_map.get((x, y), Tile())
             tile_pos = (x, y)
             blacks, whites = count_adjacent_black_and_white(tile_pos, tile_map)
@@ -155,18 +157,18 @@ def solve_part_2(tile_map):
     print("Day 0:", len([tile_id for tile_id in tile_map if tile_map[tile_id].color() == 'black']))
     print_grid(tile_map)
     print()
-    for i in range(1):
+    for i in range(100):
         new_tile_map = flip_tiles(tile_map)
-        print_grid(new_tile_map)
-        print()
+        # print_grid(new_tile_map)
+        # print()
         tile_map = new_tile_map
         print("Day {}: {}".format((i + 1), len([tile_id for tile_id in tile_map if tile_map[tile_id].color() == 'black'])))
     pass
 
 
 def solve():
-    lines = [line.strip() for line in open("easy.txt").readlines()]
-    # lines = [line.strip() for line in open("input.txt").readlines()]
+    # lines = [line.strip() for line in open("easy.txt").readlines()]
+    lines = [line.strip() for line in open("input.txt").readlines()]
     tile_map = solve_part_1(lines)
     print("Part 1:", len([tile_id for tile_id in tile_map if tile_map[tile_id].color() == 'black']))
     print("Part 2:", solve_part_2(tile_map))
