@@ -19,12 +19,25 @@ class Element:
     def prev(self):
         return self._prev
 
+    def value(self):
+        return self._value
+
 
 class CircularLinkedList:
     _current: Element
+    _val_to_element: {}
 
     def __init__(self, value):
         self._current = Element(value)
+        self._current.set_next(self._current)
+        self._current.set_prev(self._current)
+        self._val_to_element = {value: self._current}
+
+    def get_current(self):
+        return self._current
+
+    def set_current(self, element):
+        self._current = element
 
     def add(self, value):
         nxt = Element(value)
@@ -32,104 +45,108 @@ class CircularLinkedList:
 
         org_next = self._current.next()
         if org_next is not None:
+            nxt.set_next(org_next)
             org_next.set_prev(nxt)
 
         self._current.set_next(nxt)
         self._current = nxt
 
-    def remove(self, value):
-        removed = Element(value)
-        nxt.set_prev(self._current)
+        self._val_to_element[value] = nxt
 
-
-        self._current.set_next(nxt)
-        self._current = nxt
-
-
-class CircularList:
-    _numbers: deque = []
-    # _current = -1
-    _current_index = -1
-    _max = -1
-
-    def __init__(self, numbers):
-        self._numbers = numbers
-        # self._current = numbers[0]
-        self._current_index = 0
-        self._max = max(numbers)
-
-    def numbers(self):
-        return self._numbers
-
-    def current_index(self):
-        return self._current_index
-
-    def remove_n_after_index(self, n, target_index):
-        # Removes the n elements immediately after the target
-        removed = []
-        for i in range(n):
-            if target_index < len(self._numbers) - 1:
-                removed.append(self._numbers.pop(target_index + 1))
-            else:
-                removed.append(self._numbers.pop(0))
-        return removed
+    def remove_next(self):
+        to_remove = self._current.next()
+        self._current.set_next(to_remove.next())
+        to_remove.next().set_prev(self._current)
+        self._val_to_element.pop(to_remove.value())
+        return to_remove.value()
 
     def remove_n_after_current(self, n):
-        return self.remove_n_after_index(n, self._current_index)
-
-    def insert_after(self, numbers_to_insert, destination):
-        # Inserts the n elements immediately after the destination
-        destination_index = self._numbers.index(destination)
-        for i in range(len(numbers_to_insert)):
-            self._numbers.insert(destination_index + i + 1, numbers_to_insert[i])
+        return [self.remove_next() for _ in range(n)]
 
     def first_smaller_than_current(self):
-        target = self._numbers[self.current_index()] - 1
-        while target not in self._numbers:
+        target = self._current.value() - 1
+        while target not in self._val_to_element:
             target = target - 1
             if target < 1:
-                target = self._max
+                target = max(self._val_to_element)
         return target
 
-    def inc_current_index(self):
-        self._current_index = (self._current_index + 1) % len(self._numbers)
+    def unroll_from(self, value):
+        start = self._val_to_element[value]
+        start_value = start.value()
+        unrolled = []
+        while True:
+            unrolled.append(start.value())
+            start = start.next()
+            if start.value() == start_value:
+                break
+        return unrolled[1:]
 
-    def unroll_from(self, n):
-        result = self.remove_n_after_index(9, self._numbers.index(n))
-        result.remove(n)
+    def unroll(self):
+        start = self._current
+        start_value = start.value()
+        unrolled = []
+        while True:
+            unrolled.append(start.value())
+            start = start.next()
+            if start.value() == start_value:
+                break
+        return unrolled[1:]
+
+    def insert_after(self, destination_value, values_to_insert):
+        org_current = self._current
+        element = self._val_to_element[destination_value]
+        self._current = element
+        for value in values_to_insert:
+            self.add(value)
+        self._current = org_current
+
+    def move_current_to_next(self):
+        self._current = self._current.next()
+
+    def next_n_after(self, n, value):
+        current = self._val_to_element[value]
+        result = []
+        for _ in range(n):
+            current = current.next()
+            result.append(current.value())
         return result
 
-    def next_n_after(self, n, element):
-        index = self._numbers.index(element)
-        return [self._numbers[i % len(self._numbers)] for i in range(index, index + n)]
 
-
-def make_move(circular_list: CircularList):
+def make_move(circular_list: CircularLinkedList):
     next_three = circular_list.remove_n_after_current(3)
+    # print("Pick up:", next_three)
     destination = circular_list.first_smaller_than_current()
-    circular_list.insert_after(next_three, destination)
-    circular_list.inc_current_index()
+    # print("Destination:", destination)
+    circular_list.insert_after(destination, next_three)
+    circular_list.move_current_to_next()
 
 
 def solve_part_1():
+    # numbers = [3, 8, 9, 1, 2, 5, 4, 6, 7]
     numbers = [1, 5, 8, 9, 3, 7, 4, 6, 2]
-    cups = CircularList(numbers)
+    cups = CircularLinkedList(numbers.pop(0))
+    current = cups.get_current()
+    for value in numbers:
+        cups.add(value)
+    cups.set_current(current)
     for i in range(100):
-        print("numbers: {}, current: {}".format(cups.numbers(), cups.current_index()))
         make_move(cups)
     unrolled = cups.unroll_from(1)
     return "".join([str(x) for x in unrolled])
 
 
 def solve_part_2():
-    # linked_list = deque([1, 5, 8, 9, 3, 7, 4, 6, 2])
-    linked_list = deque([3, 8, 9, 1, 2, 5, 4, 6, 7])
+    # numbers = [3, 8, 9, 1, 2, 5, 4, 6, 7]
+    numbers = [1, 5, 8, 9, 3, 7, 4, 6, 2]
     for i in range(10, 1000001):
-        linked_list.append(i)
-    print(len(linked_list))
-    cups = CircularList(linked_list)
+        numbers.append(i)
+    cups = CircularLinkedList(numbers.pop(0))
+    current = cups.get_current()
+    for value in numbers:
+        cups.add(value)
+    cups.set_current(current)
     for i in range(10000000):
-        # print("numbers: {}, current: {}".format(cups.numbers(), cups.current()))
         make_move(cups)
     a, b = cups.next_n_after(2, 1)
     return a * b
@@ -137,7 +154,7 @@ def solve_part_2():
 
 def solve():
     print("Part 1:", solve_part_1())
-    # print("Part 2:", solve_part_2(numbers))
+    print("Part 2:", solve_part_2())
 
 
 solve()
